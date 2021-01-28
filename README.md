@@ -8,7 +8,7 @@ When you want to run the code, the relevant PATH parts should be changed.
 Classification_part -> py file in this folder is used for classification. The paths given in this code are training.npz and development.npz files in the res folder.
 The complexity matrix found as a result of the classification includes accuracy, recall, precision and F1 Score values.
 
-training.zip --> This file contains txt files tagged as spam and ham (not spam) for train part.
+training.zip --> This file contains txt files tagged as spam and ham (not spam) for train part.   
 development.zip --> This file contains txt files tagged as spam and ham (not spam) for test part.
                         
 Important Note: When working with a different test data, this dataset must first enter the code txt_to_npz.py in making_dataset_part. The resulting npz file is saved in the res folder in the making_dataset_part folder. Then the pathi of the new npz file in this res folder should be placed in the code in Classification_part.
