@@ -1,7 +1,3 @@
-#IREM CELIK 151180015 BM455 YAPAY ZEKAYA GIRIS UYGULAMA ODEVI 2
-#Bu kodda LogisticRegression ve CountVectorizer icin hazir kutuphaneler kullanilmamaktadir.
-#Bu sebeple kodun calismasi 1.30 dakika civari surmektedir.
-
 #importing libraries
 import numpy as np
 import nltk
@@ -196,4 +192,3 @@ if __name__ == "__main__":
     f1 = f1_score(classes_test, Y_pred)
     print('F1 Score in Percentage is =', f1 * 100)
 
-#IREM CELIK 151180015 BM455 YAPAY ZEKAYA GIRIS UYGULAMA ODEVI 2
