@@ -1,4 +1,4 @@
-#IREM CELIK 151180015 BM455 YAPAY ZEKAYA GIRIS UYGULAMA ODEVI 2
+
 #this code is making the dataset (npz form) from the txt files.
 
 import numpy as np
@@ -44,4 +44,3 @@ if __name__ == "__main__":
     classes = np.array(ls_classes, dtype=np.bool)
     np.savez_compressed(path_npz_output, texts=texts, classes=classes)
     
-#IREM CELIK 151180015 BM455 YAPAY ZEKAYA GIRIS UYGULAMA ODEVI 2
