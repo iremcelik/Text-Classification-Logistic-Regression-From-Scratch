@@ -1,4 +1,4 @@
-# Text-Classification-Logistic-Regression-without-library-
+# Text-Classification-Logistic-Regression-from-Scratch-
 Classifying emails as spam or ham (not spam) using the Logistic Regression algorithm without using Sklearn in Python 3.8.
 
 making_dataset_part -> txt_to_npz.py -> the code that converts txt files into datasets. Dataset format was determined as npz in terms of the small size of the dataset.
