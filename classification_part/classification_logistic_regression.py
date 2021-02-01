@@ -10,19 +10,47 @@ from sklearn.metrics import accuracy_score
 from sklearn.metrics import precision_score
 from sklearn.metrics import recall_score
 from sklearn.metrics import f1_score
+
 from collections import Counter
 from scipy.sparse import csr_matrix
 
-#reading the npz format data in the code
+import pickle
+
+def save_pkl(path: str, lr_model, count_vectorizer):
+    with open(path, 'wb') as f:
+        pickle.dump(lr_model, f, protocol=pickle.HIGHEST_PROTOCOL)
+        pickle.dump(count_vectorizer, f, protocol=pickle.HIGHEST_PROTOCOL)
+
+
 def get_npz_data(path_npz: str) -> (np.ndarray, np.ndarray, int):
+    """
+    Purpose: It enables Npz data to be pulled.
+    Inside the npz file:
+         texts: Keeps email texts,
+         classes: Keeps track of whether emails are raw or spam. (False: Ham, True: Spam) -> np.int8 (0: Ham, 1: Spam)
+
+    len_rows: Total number of emails in the Npz file.
+    """
     data = np.load(path_npz)
     texts = data["texts"]
     classes = data["classes"].astype(np.int8)
     len_rows = classes.shape[0]
     return texts, classes, len_rows
 
-#preprocessing the texts in txt files
+#preprocess işlemleri
 def preprocess_text(txt: str) -> str:
+    """
+    Pırpose: It ensures that unnecessary characters and extra spaces are removed from the text named txt.
+
+    txt_new = re.sub("[^a-zA-Z ]", ' ', txt):
+        Removes all non-alphabet (English alphabet) and non-spaces characters from the text.
+        
+    txt_new = re.sub(' [abcdefghjklmnopqrstuvwxyz] ', ' ', txt_new):
+        Removes single characters from text.
+
+    txt_new = re.sub(' ( )+', ' ', txt_new):
+        It provides removal of excess gaps.
+    """
     txt_new = re.sub("[^a-zA-Z ]", ' ', txt)
     txt_new = re.sub(' [abcdefghjklmnopqrstuvwxyz] ', ' ', txt_new)  # Except i character, abcdefghijklmnopqrstuvwxyz
     txt_new = re.sub(' ( )+', ' ', txt_new)
@@ -30,6 +58,16 @@ def preprocess_text(txt: str) -> str:
 
 
 def clean_words(txt: str, ls_stopwords: tuple) -> str:
+    """
+    Purpose: To remove the words in the list (tuple) named ls_stopwords from the text named txt.
+        Example:
+            txt: "Dear, Marry. Have you ever seen our village?", ls_stopwords: ("you", "ever", "our")
+            Output: "Dear, Marry. Have seen village?"
+
+    Stopwords:
+        It is a list of words that are frequently used in texts but that add little meaning to the text.
+        For example, expressions such as "the", "is", "to", "at" have little or no effect on the meaning of the sentence, so removing these words from the text is preferred.
+    """
     ls_words = txt.split(' ')
     ls_deleted_index = []
     for i in range(len(ls_words)):
@@ -43,21 +81,32 @@ def clean_words(txt: str, ls_stopwords: tuple) -> str:
 
 
 def get_stemming_text(txt: str) -> str:
+    """
+    It turns words into their roots. 
+    For example: the words "playing", "plays", and "played" all turn into the word root "play".
+    """
     stemmer = SnowballStemmer("english")
     ls_words = txt.split(' ')
     for i in range(len(ls_words)):
         ls_words[i] = stemmer.stem(ls_words[i])
     return ' '.join(ls_words)
 
-#Implementation of the LogisticRegression without using sk-learn
+
+#Logistic Regression Kodu
 class LogisticRegression:
     def __init__(self, learning_rate=0.001, n_iters=1000):
+        """
+        LogisticRegression constructor function and initial values.
+        """
         self.lr = learning_rate
         self.n_iters = n_iters
         self.weights = None
         self.bias = None
 
     def fit(self, X, y):
+        """
+        It ensures that weights are updated according to the incoming sample and class information.
+        """
         n_samples, n_features = X.shape
 
         # init parameters
@@ -79,20 +128,32 @@ class LogisticRegression:
             self.bias -= self.lr * db
 
     def predict(self, X):
+        """
+        It enables the class prediction of a new sample sent with a parameter by a pre-trained logistic regression model.
+        """
         linear_model = np.dot(X, self.weights) + self.bias
         y_predicted = self._sigmoid(linear_model)
         y_predicted_cls = [1 if i > 0.5 else 0 for i in y_predicted]
         return np.array(y_predicted_cls)
 
     def _sigmoid(self, x):
+        """
+        The Sigmoid function is used to equal the submitted numeric values to a value in the range (0-1).
+        """
         return 1 / (1 + np.exp(-x))
 
-#Implementation of the CountVectorizer without using sk-learn CountVectorizer library
+#CountVectorizer 
 class CountVectorizer:
     def __init__(self):
+        """
+        Assigning initial values with the Constructor method.
+        """
         self.vocabulary = dict()
 
     def fit(self, ls_texts: list):
+        """
+        Creating a new vocabulary belonging to the vectorizer by taking the words from the texts sent.
+        """
         self.unique_words = set()
 
         for sentence in ls_texts:
@@ -106,6 +167,9 @@ class CountVectorizer:
         return self.vocabulary
 
     def transform(self, ls_texts: list):
+        """
+        It allows converting new incoming texts into vectors according to the previously created vocabulary.
+        """
         row, col, val = [], [], []
 
         for idx, sentence in enumerate(ls_texts):
@@ -122,20 +186,24 @@ class CountVectorizer:
         return csr_matrix((val, (row, col)), shape=(len(ls_texts), len(self.vocabulary)))
 
     def fit_transform(self, ls_texts: list):
+        """
+        It enables the creation of the vocabulary over the sent text list and to extract the vectors of the texts according to the created vocabulary.
+        """
         self.fit(ls_texts)
         return self.transform(ls_texts)
 
 
 if __name__ == "__main__":
-    
-    #giving the dataset paths
     path_npz_train = "res/training.npz"
-    
-    #with another test dataset, the txt files must be entering the txts_to_npz.py code first
-    #and the output will be the npz format and the npz file path must given in this part.
     path_npz_test = "res/development.npz"
+  
+    # Allows the model to be saved with the given name.
+    path_save_pkl = "res/classifier_countvectorizer_2.pkl"
 
-    nltk.download('stopwords')
+    try:
+        nltk.data.find('corpora/stopwords')
+    except LookupError:
+        nltk.download('stopwords')
     stopwords = nltk.corpus.stopwords.words('english')
 
     texts, classes, len_rows = get_npz_data(path_npz_train)
@@ -146,16 +214,16 @@ if __name__ == "__main__":
         text_active = preprocess_text(text_active)
         text_active = clean_words(text_active, stopwords)
         # text_active = get_stemming_text(text_active)
-        ls_words_active = text_active.split(' ')
-        ls_texts.append(ls_words_active)
+        ls_texts.append(text_active)
 
-    words_whole = [' '.join(words) for words in ls_texts]
     cv = CountVectorizer()
-    X = cv.fit_transform(words_whole).toarray()
+    X = cv.fit_transform(ls_texts).toarray()
     print(X)
 
     lr = LogisticRegression()
     lr.fit(X, classes)
+
+    save_pkl(path_save_pkl, lr, cv)
 
     texts_test, classes_test, len_rows_test = get_npz_data(path_npz_test)
 
@@ -165,11 +233,9 @@ if __name__ == "__main__":
         text_active = preprocess_text(text_active)
         text_active = clean_words(text_active, stopwords)
         # text_active = get_stemming_text(text_active)
-        ls_words_active = text_active.split(' ')
-        ls_texts.append(ls_words_active)
+        ls_texts.append(text_active)
 
-    words_whole = [' '.join(words) for words in ls_texts]
-    X_test = cv.transform(words_whole).toarray()
+    X_test = cv.transform(ls_texts).toarray()
     print(X_test)
 
     Y_pred = lr.predict(X_test)
