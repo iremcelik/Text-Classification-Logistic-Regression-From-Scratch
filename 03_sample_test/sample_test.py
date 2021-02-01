@@ -4,10 +4,6 @@ import re
 import os
 import os.path as op
 from nltk.stem.snowball import SnowballStemmer
-#IREM CELIK 151180015 BM455 YAPAY ZEKAYA GIRIS UYGULAMA ODEVI 2
-#test kodudur.
-#test edilmek istenen HAM VERİ(.txt) içeren klasör veya direkt .txt dosyası pathi kodda verilmelidir. 
-#3. sırada çalıştırılması gereken koddur.
 
 from collections import Counter
 from scipy.sparse import csr_matrix
@@ -24,18 +20,14 @@ def load_pkl(path: str):
 
 class LogisticRegression:
     def __init__(self, learning_rate=0.001, n_iters=1000):
-        """
-        LogisticRegression constructor fonksiyonu ve ilk değerlerin atanması.
-        """
+       
         self.lr = learning_rate
         self.n_iters = n_iters
         self.weights = None
         self.bias = None
 
     def fit(self, X, y):
-        """
-        Gelen sample ve class bilgilerine göre ağırlıkların güncellenmesini sağlamaktadır.
-        """
+       
         n_samples, n_features = X.shape
 
         # init parameters
@@ -57,33 +49,24 @@ class LogisticRegression:
             self.bias -= self.lr * db
 
     def predict(self, X):
-        """
-        Parametre ile gönderilen yeni bir sample'ın önceden eğitilmiş bir lojistik regression modeli
-        tarafından sınıfının tahmin edilmesini sağlar.
-        """
+        
         linear_model = np.dot(X, self.weights) + self.bias
         y_predicted = self._sigmoid(linear_model)
         y_predicted_cls = [1 if i > 0.5 else 0 for i in y_predicted]
         return np.array(y_predicted_cls)
 
     def _sigmoid(self, x):
-        """
-        Sigmoid fonksiyonu gönderilen sayısal değerleri (0-1) aralığında bir değere eşitlemek için kullanılır.
-        """
+       
         return 1 / (1 + np.exp(-x))
 
 
 class CountVectorizer:
     def __init__(self):
-        """
-        Constructor metodu ile ilk değerlerin atanması.
-        """
+       
         self.vocabulary = dict()
 
     def fit(self, ls_texts: list):
-        """
-        Gönderilen metinlerden sözcüklerin alınarak vectorizer'e ait yeni bir sözcük haznesinin oluşturulması.
-        """
+       
         self.unique_words = set()
 
         for sentence in ls_texts:
@@ -97,9 +80,7 @@ class CountVectorizer:
         return self.vocabulary
 
     def transform(self, ls_texts: list):
-        """
-        Önceden oluşturulmuş sözcük haznesine göre, gelen yeni textlerin vektörlere dönüştürülmesini sağlar.
-        """
+       
         row, col, val = [], [], []
 
         for idx, sentence in enumerate(ls_texts):
@@ -116,10 +97,7 @@ class CountVectorizer:
         return csr_matrix((val, (row, col)), shape=(len(ls_texts), len(self.vocabulary)))
 
     def fit_transform(self, ls_texts: list):
-        """
-        Gönderilen text listesi üzerinden kelime haznesinin oluşturulmasını ve oluşturulan kelime haznesine göre
-        metinlerin vektörlerinin çıkarılmasını sağlamaktadır.
-        """
+       
         self.fit(ls_texts)
         return self.transform(ls_texts)
 
@@ -139,18 +117,7 @@ def get_txt_data(path: str) -> str:
 
 
 def preprocess_text(txt: str) -> str:
-    """
-    Amaç: txt adlı metinden gereksiz karakterlerin ve fazla olan boşlukların silinmesini sağlamaktadır.
-
-    txt_new = re.sub("[^a-zA-Z ]", ' ', txt):
-        Alfabede yer almayan (İngiliz alfabesi) ve boşluk olmayan tüm karakterleri metinden siler.
-
-    txt_new = re.sub(' [abcdefghjklmnopqrstuvwxyz] ', ' ', txt_new):
-        Tek karakterleri metinden siler.
-
-    txt_new = re.sub(' ( )+', ' ', txt_new):
-        Fazla boşlukların atılmasını sağlamaktadır.
-    """
+    
     txt_new = re.sub("[^a-zA-Z ]", ' ', txt)
     txt_new = re.sub(' [abcdefghjklmnopqrstuvwxyz] ', ' ', txt_new)  # Except i character, abcdefghijklmnopqrstuvwxyz
     txt_new = re.sub(' ( )+', ' ', txt_new)
@@ -158,17 +125,7 @@ def preprocess_text(txt: str) -> str:
 
 
 def clean_words(txt: str, ls_stopwords: tuple) -> str:
-    """
-    Amaç: txt adlı metinden, ls_stopwords adlı listede (tuple) olan kelimelerin temizlenmesidir.
-        Örnek:
-            txt: "Dear, Marry. Have you ever seen our village?", ls_stopwords: ("you", "ever", "our")
-            Çıktı: "Dear, Marry. Have seen village?"
-
-    Stopwords:
-        Metinlerde sıklıkla kullanılan ancak metnin anlamına çok az anlam katan sözcükleri tutan listedir.
-        Örneğin “the”, “is”, “to”, “at” gibi ifadelerin cümlenin anlamına etkisi yok denecek kadar azdır,
-        dolayısıyla metinden bu kelimelerin çıkarılması tercih edilir.
-    """
+    
     ls_words = txt.split(' ')
     ls_deleted_index = []
     for i in range(len(ls_words)):
@@ -210,13 +167,10 @@ def predict_samples(lr, cv, stopwords, path_scan):
 
 if __name__ == "__main__":
     
-    #02 numaralı kodda kaydettiğimiz modeli yüklüyoruz.
+    #loading the model
     path_pkl = "res/classifier_countvectorizer_2.pkl"
     
-    #test etmek istediğimiz txt formatında veri içeren klasör pathi verilmelidir.
-    #aynı şekilde test edilmesi istenen txt verisinin pathi de verilebilir. 
-    #kod hem klasör hem de .txt için işlem yapabilmektedir.
-    path_scan = r"res/unseen2_tamamen_ham_test_data"
+    path_scan = r"res/unseen_all_ham_test_data"
 
     lr, cv = load_pkl(path_pkl)
 
@@ -233,4 +187,3 @@ if __name__ == "__main__":
     else:
         print(predict_samples(lr, cv, stopwords, path_scan))
         
-#IREM CELIK 151180015 BM455 YAPAY ZEKAYA GIRIS UYGULAMA ODEVI 2
