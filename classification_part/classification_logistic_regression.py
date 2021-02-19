@@ -37,7 +37,7 @@ def get_npz_data(path_npz: str) -> (np.ndarray, np.ndarray, int):
     len_rows = classes.shape[0]
     return texts, classes, len_rows
 
-#preprocess işlemleri
+#preprocess 
 def preprocess_text(txt: str) -> str:
     """
     Pırpose: It ensures that unnecessary characters and extra spaces are removed from the text named txt.
@@ -92,7 +92,7 @@ def get_stemming_text(txt: str) -> str:
     return ' '.join(ls_words)
 
 
-#Logistic Regression Kodu
+#Logistic Regression 
 class LogisticRegression:
     def __init__(self, learning_rate=0.001, n_iters=1000):
         """
